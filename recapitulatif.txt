@@ -1,0 +1,101 @@
+1. Sélection d'éléments
+
+$('element'); // Exemple : $('p'), $('#id'), $('.class')
+
+Sélecteurs avancés :
+$('ul li:first'); // Premier élément
+$('ul li:nth-child(2)'); // Deuxieme élément
+
+<ul>
+	<li></li>
+	<li></li> <-- Deuxieme element
+	<li></li>
+	<li></li>
+	<li></li>
+</ul>
+
+
+2. Manipulation du DOM
+
+// Modification du contenu
+
+$("selecteur").text("Salut les gens"); 			// javascript --> document.querySelector("selecteur").innerText = "Salut les gens"
+$("selecteur").html("<h1>Salut les gens</h1>"); // javascript --> document.querySelector("selecteur").innerHTML = "Salut les gens"
+
+pour des champs de type input:
+<input type="text" name="name" id="name" value="" />
+
+// recuperer la valeur
+$("#name").val() // javascript -->  const name = document.querySelector("#name").value
+
+// modifier la valeur
+$("#name").val("Ariel") // javascript -->  document.querySelector("#name").value = "Ariel"
+
+// Ajouter/Retirer des éléments :
+
+
+<ul id="fruit-list">
+	<li>Concombre</li>
+	<li>Tomate</li> 
+	<li>Banane</li>
+	<li>Kiwi</li>
+	<li>Melon</li>
+	Patate
+</ul>
+
+// Ajouter a la fin
+$("#fruit-list").append("<li>Patate</li>") // let el = document.createElement('li');
+										   // el.innerText = 'Patate'
+										   // javascript ---->  document.querySelector("#fruit-list").append(el)
+
+
+// Ajouter au debut
+$("#fruit-list").prepend("<li>Patate</li>") // let el = document.createElement('li');
+										   // el.innerText = 'Patate'
+										   // javascript ---->  document.querySelector("#fruit-list").prepend(el)
+
+// Supprimer 
+$("#fruit-list").remove() 					// tout la liste 	// javascript --> document.querySelector("#fruit-list").remove();
+$("#fruit-list li:first").remove() 			// le premier
+$("#fruit-list li:nth-child(2)").remove() 	// le deuxieme
+
+etc....
+
+
+3. Manipulation des classes et attributs
+
+
+// classe
+
+// ajouter une classe
+$("selecteur").addClass("btn btn-primary"); // document.querySelector("selecteur").classList.add("btn btn-primary")
+
+// supprimer une classe
+$("selecteur").removeClass("btn btn-primary"); // document.querySelector("selecteur").classList.remove("btn btn-primary")
+
+// supprimer une classe
+$("selecteur").toggleClass("btn btn-primary"); // document.querySelector("selecteur").classList.toggle("btn btn-primary")
+
+// attributs
+
+<a id="link" >redirection vers google</a>
+
+// ajout attribut
+$("a").attr("href","https://google.com");
+
+// supprimer un attribut
+$("a").removeAttr("href");
+
+
+4. Gestion des événements
+
+// ajouter une surveillance sur une action
+$('#btn').on('click', function() {
+    alert('Clic détecté');
+});
+
+
+// Délégation d'événements :
+$('ul').on('click', 'li', function() {
+    alert($(this).text());
+});
