@@ -1,145 +1,6 @@
-var users = [
-	{
-	name: "Zeev",
-	email: "zeev@gmail.com",
-	role: "dev",
-	phone: "01782938490",
-	is_available: false,
-	},
-	{
-	name: "Aviva",
-	email: "aviva@gmail.com",
-	role: "designer",
-	phone: "01782938491",
-	is_available: true,
-	},
-	{
-	name: "Lior",
-	email: "lior@gmail.com",
-	role: "project manager",
-	phone: "01782938492",
-	is_available: false,
-	},
-	{
-	name: "Rivka",
-	email: "rivka@gmail.com",
-	role: "qa engineer",
-	phone: "01782938493",
-	is_available: true,
-	},
-	{
-	name: "Noam",
-	email: "noam@gmail.com",
-	role: "devops",
-	phone: "01782938494",
-	is_available: true,
-	},
-	{
-	name: "Yarden",
-	email: "yarden@gmail.com",
-	role: "frontend dev",
-	phone: "01782938495",
-	is_available: false,
-	},
-	{
-	name: "Shira",
-	email: "shira@gmail.com",
-	role: "backend dev",
-	phone: "01782938496",
-	is_available: true,
-	},
-	{
-	name: "Eitan",
-	email: "eitan@gmail.com",
-	role: "ux researcher",
-	phone: "01782938497",
-	is_available: true,
-	},
-	{
-	name: "Tamar",
-	email: "tamar@gmail.com",
-	role: "fullstack dev",
-	phone: "01782938498",
-	is_available: false,
-	},
-	{
-	name: "Daniel",
-	email: "daniel@gmail.com",
-	role: "product owner",
-	phone: "01782938499",
-	is_available: true,
-	},
-	{
-	name: "Yael",
-	email: "yael@gmail.com",
-	role: "data scientist",
-	phone: "01782938500",
-	is_available: false,
-	},
-	{
-	name: "Yonatan",
-	email: "yonatan@gmail.com",
-	role: "ai engineer",
-	phone: "01782938501",
-	is_available: true,
-	},
-	{
-	name: "Michal",
-	email: "michal@gmail.com",
-	role: "qa automation",
-	phone: "01782938502",
-	is_available: true,
-	},
-	{
-	name: "Oren",
-	email: "oren@gmail.com",
-	role: "cto",
-	phone: "01782938503",
-	is_available: false,
-	},
-	{
-	name: "Gal",
-	email: "gal@gmail.com",
-	role: "system admin",
-	phone: "01782938504",
-	is_available: true,
-	},
-	{
-	name: "Dalia",
-	email: "dalia@gmail.com",
-	role: "marketing manager",
-	phone: "01782938505",
-	is_available: false,
-	},
-	{
-	name: "Moshe",
-	email: "moshe@gmail.com",
-	role: "content writer",
-	phone: "01782938506",
-	is_available: true,
-	},
-	{
-	name: "Ronen",
-	email: "ronen@gmail.com",
-	role: "cloud architect",
-	phone: "01782938507",
-	is_available: false,
-	},
-	{
-	name: "Lea",
-	email: "lea@gmail.com",
-	role: "scrum master",
-	phone: "01782938508",
-	is_available: true,
-	},
-	{
-	name: "Boaz",
-	email: "boaz@gmail.com",
-	role: "data engineer",
-	phone: "01782938509",
-	is_available: true,
-	}
-];
+// Equipement
+const API_URL = "http://localhost:3000";
+const USERS_URL = API_URL + "/users"
 
 const roleBadges = {
 	dev: "badge bg-primary", // Bleu
@@ -164,6 +25,46 @@ const roleBadges = {
 	"data engineer": "badge bg-info", // Bleu ciel
 };
 
+async function requestData(url, method_http, data,  callback_bs = () => {}, callback_finish = () => {} ) {
+	return await new Promise( (resolve,reject)=> {
+		$.ajax({
+			url: url,
+			type: method_http,
+			dataType: 'json',
+			contentType: 'application/json',
+			data: JSON.stringify(data),
+			beforeSend: function() {
+				callback_bs()
+			},
+			complete: function() {
+				callback_finish()
+			},
+			success: function(data) {
+				resolve(data);
+			},
+			error: function(xhr) {
+				console.error("Erreur Ajax: "+ xhr.statusText);
+			}
+		})
+	})
+}
+
+async function fetchUsersRequest() {
+	return await requestData(USERS_URL,"GET");
+}
+
+async function updateUserRequest(user,id) {
+	return await requestData(`${USERS_URL}/${id}`,"PUT", user);
+}
+
+async function storeUserRequest(user) {
+	return await requestData(`${USERS_URL}`,"POST", user);
+}
+
+async function deleteUserRequest(id) {
+	return await requestData(`${USERS_URL}/${id}`,'DELETE');
+}
+
 function showUsers(users){
 	users.forEach(function(user){
 
@@ -180,7 +81,7 @@ function showUsers(users){
 				<td>
 					<div class="d-flex justify-content-center align-items-center" style="gap: 1rem;">
 						<button type="button" class="update-user badge bg-primary" data-json='${JSON.stringify(user)}' data-bs-toggle="modal" data-bs-target="#updateUser">Modifier</button>
-						<button type="button" class="delete-user badge bg-danger">Supprimer</button>
+						<button type="button" class="delete-user badge bg-danger" data-id='${user.id}'>Supprimer</button>
 					</div>
 				</td>
 			</tr>
@@ -191,7 +92,7 @@ function showUsers(users){
 	})
 }
 
-function deleteUser(e){
+async function deleteUser(e){
 
 	// Recuperer une information depuis un element - Parcours
 	// 1. aller a l'element HTML parent: closest(selecteur)
@@ -199,15 +100,17 @@ function deleteUser(e){
 	// 3. recuperer la rangee
 	var row = $(this).closest("tr");
 
+	const ok = confirm("Voulez-vous supprimer cette utilisateur?")
+	if(!ok) return; 
+	
+	let response = await deleteUserRequest($(this).data('id'));
+
+	if(!response.user) alert("Erreur lors de la suppression de l'utilisateur")
+
 	// 4. recuperer le nom (indicatif)
 	const name = row.find("td:first div").text();
-	alert('suppression utilisateur: '+name);
 
-	// 5. nettoyer la liste
-	users = users.filter(function(user){
-		if(user.name === name) return;
-		return user;
-	})
+
 
 	// 6. supprimer en front l'utilisateur
 	row.remove();
@@ -228,15 +131,18 @@ function updateUserModal(){
 	$("#updateUser [name=email]").val(user.email)
 	$("#updateUser [name=role]").val(user.role)
 	$("#updateUser [name=phone]").val(user.phone)
+	$("#updateUser [name=id]").val(user.id)
+
 
 	// speciale pour les checkbox
 	$("#updateUser [name=is_available]").prop("checked", user.is_available);
 }
 
-function updateUser(e){
+async function updateUser(e){
 
 		// 1. recuperer les elements du formulaire de mis a jour utilisateur
 		let user = {
+			id: $("#updateUser [name=id]").val(),
 			name: $("#updateUser [name=name]").val(),
 			email: $("#updateUser [name=email]").val(),
 			role:$("#updateUser [name=role]").val(),
@@ -244,6 +150,8 @@ function updateUser(e){
 			is_available:$("#updateUser [name=is_available]").is(":checked")
 		}
 
+		let response = await updateUserRequest(user,user.id);
+		if(!('user' in response))
 
 		// 2. injecter dans le DOM ces elements
 		cursor.find("td:nth-child(1) div").text(user.name);
@@ -260,7 +168,7 @@ function updateUser(e){
 		cursor.find("button.update-user").data('json', user);
 }
 
-function storeUser(e){
+async function storeUser(e){
 
 	// 1. recuperer les elements du formulaire de mis a jour utilisateur
 	let user = {
@@ -270,7 +178,9 @@ function storeUser(e){
 		phone:$("#addUser [name=phone]").val(),
 		is_available:$("#addUser [name=is_available]").is(":checked")
 	}
-	users.push(user)
+
+	let response = await storeUserRequest(user);
+	if(!('user' in response)) alert("Erreur lors de l'ajout utilisateur");
 	
 	const $user = $(`
 		<tr>
@@ -281,15 +191,12 @@ function storeUser(e){
 			<td><div class="d-flex justify-content-center align-items-center">${user.is_available ? '<i class="bi bi-check-circle-fill text text-success "></i>' : '<i class=" bi bi-x-circle-fill text text-danger"></i>'}</div></td>
 			<td>
 				<div class="d-flex justify-content-center align-items-center" style="gap: 1rem;">
-					<button type="button" class="update-user badge bg-primary" data-json='${JSON.stringify(user)}' data-bs-toggle="modal" data-bs-target="#updateUser">Modifier</button>
-					<button type="button" class="delete-user badge bg-danger">Supprimer</button>
+					<button type="button" class="update-user badge bg-primary" data-id='${user.id}' data-json='${JSON.stringify(user)}' data-bs-toggle="modal" data-bs-target="#updateUser">Modifier</button>
+					<button type="button" class="delete-user badge bg-danger" data-id='${user.id}'>Supprimer</button>
 				</div>
 			</td>
 		</tr>
 	`);
-
-	
-
 
 	// 2. injecter dans le DOM ces elements
 	$("#users-table tbody").append($user);
@@ -304,21 +211,21 @@ function storeUser(e){
 	// cursor.find("button.update-user").data('json', user);
 }
 
-$(document).ready(function(){
+$(document).ready(async function(){
 	var cursor = '';
 
 	$("#users-table tbody").html(" ")
 
+	var usersData = await fetchUsersRequest();
+
 	// affiche les utilisateurs sur la page web
-	showUsers(users)
+	showUsers(usersData.users)
 
-	// supprime un utilisateur
-	$(".delete-user").on("click", deleteUser)
-
-	// ouvre modal utilisateur, affiche donnee
+	// modal
 	$(".update-user").on("click", updateUserModal)
 
-	// enregistre nouvelle info. utilisateur
+	// logique lie a la gestion utilisateur
+	$(".delete-user").on("click", deleteUser)
 	$(".update-user--save").on("click", updateUser)
 	$(".add-user--save").on("click", storeUser)
 
